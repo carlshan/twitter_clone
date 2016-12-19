@@ -6,8 +6,13 @@
     </head>
     <body>
 	<header>Testing</header>
-	<h1> Twitter Clone Course</h1>
-	<p> We're learning HTML!</p>
+	<main>
+	    <form id="tweet-form" actions="/tweets/create" method="POST">
+		<input id="tweet-form-handle" type="text" name="handle" placeholder="Carl">
+		<textarea id="tweet-form-body" name="body" placeholder="What's happening?"></textarea>
+		<button id="tweet-form-button">Tweet</button>
+	    </form>
+	</main>
     </body>
 </html>
 

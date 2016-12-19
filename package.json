@@ -1,0 +1,22 @@
+{
+  "name": "twitter_clone",
+  "version": "1.0.0",
+  "description": "Following Spark School tutorial for learning NodeJS via creating a Twitter clone.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/carlshan/twitter_clone.git"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Carl Shan <carl@carlshan.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carlshan/twitter_clone/issues"
+  },
+  "homepage": "https://github.com/carlshan/twitter_clone"
+}

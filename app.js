@@ -9,7 +9,7 @@ var app = express();
 var connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
-    password: '4Brothers',
+    password: '',
     database: 'twitter'
 });
 
@@ -49,7 +49,7 @@ app.get('/', function(req, res) {
     });
 });
 
-// Creating a Tweet
+// Creating a Tweet and inserting it into the mysql database.
 app.post('/tweets/create', function(req, res) {
     var query = 'INSERT INTO Tweets(handle, body) VALUES(?, ?)';
     var handle = req.body.handle;
@@ -63,3 +63,37 @@ app.post('/tweets/create', function(req, res) {
     });
 });
 
+// Allowing the editing of Tweets
+app.get('/tweets/:id([0-9]+)/edit', function(req, res) {
+    var query = 'SELECT * from Tweets WHERE id = ?';
+    var tweet_id = req.params.id;
+
+    connection.query(query, [tweet_id], function(err, results) {
+	if(err || results.length === 0) {
+	    console.log(err || 'No Tweets found!');
+	    res.redirect('/');
+	    return;
+	}
+	
+	var tweet = results[0]
+	tweet.time_from_now = moment(tweet.created_at).fromNow();
+
+	res.render('edit-tweet', { tweet: tweet });
+    }); 
+});
+
+// Updating the database with the edited Tweet
+app.post('/tweets/:id([0-9]+)/update', function(req, res) {
+    var query = 'UPDATE Tweets SET body = ?, handle = ? WHERE id = ?';
+    var tweet_id = req.params.id;
+    var body = req.body.body;
+    var handle = req.body.handle;
+
+    connection.query(query, [body, handle, tweet_id], function(err, results) {
+	if(err) {
+	    console.log(err);
+	    return;
+	}
+	res.redirect('/');
+    });
+});

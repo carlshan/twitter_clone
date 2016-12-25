@@ -74,7 +74,7 @@ app.get('/tweets/:id([0-9]+)/edit', function(req, res) {
 	    res.redirect('/');
 	    return;
 	}
-	
+
 	var tweet = results[0]
 	tweet.time_from_now = moment(tweet.created_at).fromNow();
 
@@ -98,8 +98,8 @@ app.post('/tweets/:id([0-9]+)/update', function(req, res) {
     };
 
     if(isDelete) {
-	connection.query(deleteQuery, [tweet_id], queryCallback) 
+	connection.query(deleteQuery, [tweet_id], queryCallback);
     } else {
-	connection.query(updateQuery, [body, handle, tweet_id], queryCallback)
+	connection.query(updateQuery, [body, handle, tweet_id], queryCallback);
     }
 });

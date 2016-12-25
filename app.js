@@ -4,6 +4,8 @@ var mysql = require('mysql');
 var express = require('express');
 var bodyParser = require('body-parser');
 var moment = require('moment');
+var cookieParser = require('cookie-parser');
+var authUser = require('./middleware/auth-user');
 
 var app = express();
 var connection = mysql.createConnection({
@@ -28,12 +30,15 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 
 // Specifying where .css files will be
+// Adding other middleware for parsing cookies and urls.
 app.use(express.static('./public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Home 
 app.get('/', function(req, res) {
     var query = 'SELECT * FROM Tweets ORDER BY created_at DESC';
+    var tweetsCreated = req.cookies.tweets_created || [];
 
     connection.query(query, function(err, results) {
 	if(err) {
@@ -42,7 +47,8 @@ app.get('/', function(req, res) {
 
 	for(var i =0; i < results.length; i++) {
 	    var tweet = results[i];
-	    results[i].time_from_now = moment(tweet.created_at).fromNow();
+	    tweet.time_from_now = moment(tweet.created_at).fromNow();
+	    tweet.isEditable = tweetsCreated.includes(tweet.id);
 	}
 
 	res.render('tweets', { tweets: results } );
@@ -54,17 +60,22 @@ app.post('/tweets/create', function(req, res) {
     var query = 'INSERT INTO Tweets(handle, body) VALUES(?, ?)';
     var handle = req.body.handle;
     var body = req.body.body;
+    var tweetsCreated = req.cookies.tweets_created || [];
 
-    connection.query(query, [handle, body], function(err) {
+    connection.query(query, [handle, body], function(err, results) {
 	if(err) {
 	    console.log(err);
 	}
-    res.redirect('/');
+
+	tweetsCreated.push(results.insertId);
+	res.cookie('tweets_created', tweetsCreated, { httpOnly: true});
+
+	res.redirect('/');
     });
 });
 
 // Allowing the editing of Tweets
-app.get('/tweets/:id([0-9]+)/edit', function(req, res) {
+app.get('/tweets/:id([0-9]+)/edit', authUser, function(req, res) {
     var query = 'SELECT * from Tweets WHERE id = ?';
     var tweet_id = req.params.id;
 
@@ -83,7 +94,7 @@ app.get('/tweets/:id([0-9]+)/edit', function(req, res) {
 });
 
 // Updating the database with the edited Tweet
-app.post('/tweets/:id([0-9]+)/update', function(req, res) {
+app.post('/tweets/:id([0-9]+)/update', authUser, function(req, res) {
     var updateQuery = 'UPDATE Tweets SET body = ?, handle = ? WHERE id = ?';
     var deleteQuery = 'DELETE FROM Tweets WHERE id = ?';
     var tweet_id = req.params.id;
